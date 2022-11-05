@@ -1,47 +1,44 @@
-# README - React Meeting Demo
+# practice-azure-serverless
 
-This is the SDK react meeting demo app. It shows how to use the Amazon Chime SDK and Chime SDK UI Component Library to build a react meeting app. Since it incorporates Amazon Voice Focus feature, please make sure your device meets the minimum requirement based on [Browser compatibility](https://github.com/aws/amazon-chime-sdk-js/blob/master/guides/09_Amazon_Voice_Focus.md#browser-compatibility). If you want to use premium feature like Amazon Chime Echo Reduction, the aws-sdk version is required to be at least 2.1034.0.
+azure環境でサーバレスアプリケーションを実現するための練習用プログラム。
+ついでにフロントエンドとしてSvelteも触ってみる。
 
-## To run the demo app locally:
+## 参考
 
-1. If you haven't already, [configure your AWS credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html).
+- [svelte documentation](https://svelte.jp/docs#getting-started)
+- AzureのPython SDK関連
+  - [SDKの公式サンプルコード](https://github.com/Azure/azure-sdk-for-python)
+  - [cosmos関連の関数についてまとめているページ](https://learn.microsoft.com/ja-jp/azure/cosmos-db/nosql/samples-python)
+  - [azure-cosmos package documentation](https://learn.microsoft.com/ja-jp/python/api/azure-cosmos/azure.cosmos?preserve-view=true&view=azure-python)
+  - [pythonでcosomosを利用するためのtutorialプログラム](https://github.com/Azure-Samples/azure-cosmos-db-python-getting-started/blob/main/cosmos_get_started.py)
 
-2. In the root directory `apps/meeting`, run `npm install`
+## 作業ログ
 
-3. Start the webpack server and node server concurrently: `npm start`
+### 初期設定
 
-4. Open https://0.0.0.0:9000/ in your browser
+setup svelte
 
-### Troubleshooting
-
-- You can change the `amazon-chime-sdk-js` [log level](https://aws.github.io/amazon-chime-sdk-js/enums/loglevel.html) by providing `logLevel` through URL as a query parameter with value 'warn' | 'error' | 'info' | 'debug' | 'off'.
-
-  ```
-   https://0.0.0.0:9000/?logLevel=debug
-  ```
-
-- `UnrecognizedClientException: The security token included in the request is invalid.` when trying to join a meeting
-
-  This likely means that your AWS credentials are invalid. Refer to the [AWS Configuration docs](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html) for setting up your credentials.
-
-## To deploy the serverless device demo
-
-### Install aws and sam command line tools
-
-- [Install the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv1.html)
-- [Install the AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
-
-### Run deployment script
-
-The following will create a CloudFormation stack containing a Lambda and API Gateway deployment that runs the demo. Note that S3 bucket name should be globally unique.
-
-```
-cd /serverless
-node ./deploy.js -r us-east-1 -b <YOUR-S3-BUCKET-NAME> -s <YOUR-CLOUDFORMATION-STACK-NAME>
+```powershell
+npm create vite@latest practice-azure-serverless -- --template svelte
 ```
 
-The script will create an S3 bucket and CloudFormation stack with Lambda and API Gateway resources required to run the demo. After the script finishes, it will output a URL that can be opened in a browser.
+Azure Functions のローカルでのセットアップ。
+VSCode Extentionsでセットアップするのではなく、powershellでfunc(Azureからダウンロード)を利用しないと、指定したディレクトリにFunctionsのプログラムを展開できなかったので、このコマンドを使った。
 
-## Contributing
+```powershell
+func init api
+```
 
-Please check the CONTRIBUTING.md file in `apps/meeting` for more information. Please do not open PRs against the "main" branch for this demo. "main" branch is the stable branch and "meeting-dev" branch is used for contributing.
+その後、VSCode上で Azure - WORKSPACE(左下にある)から`Local Project`を選択し、initみたいなやつをクリックすると`.vscode/extentions.json`にazurefunctionとその言語について追記してくれて、
+GUI上で作ったfunctionが作ったディレクトリ(ここでは`api`)に収まるようになる。
+
+### Azure Cosmos DB Emulatorとの接続まで
+
+localに環境変数を設定するのは億劫なので`api.local.settings.json`に設定ファイルを置く。
+その内容の例は[api.local.settings.example.json](./api/local.settings.example.json)を参照。
+
+ローカルでのFunctionの実行は、VSCode Extentionを使えばできる。
+WORKSPACE(左下にある)のLocalProjectを選択してF5で起動し、テストしたい関数を右クリックで実行すればよい。
+
+> TODO: F5を押したときエラーが起きるが、`Debug anyway`を押せば動く。しかし、意味をわかっていないので、調査が必要。
+
